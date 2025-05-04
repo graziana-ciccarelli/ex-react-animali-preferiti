@@ -1,36 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I miei animali Preferiti</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- React -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <!-- ReactDOM -->
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <!-- Babel (necessario per usare JSX direttamente nell'HTML) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I miei animali Preferiti</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- React -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-    <header>
-      <h1>I miei animali Preferiti</h1>
-    </header>
-    <main>
-        <figure>
-            <img src="https://picsum.photos/400/300" alt="Immagine Casuale">
-        </figure>
-        <div class="lista-animali"></div>
-    </main>
-      <footer>
-      <p>Creato con amore da... un collega sbadato! 🐾</p>
-    </footer>
+  <header>
+    <h1>I miei animali Preferiti</h1>
+  </header>
 
-  <!-- Componenti React -->
+  <main>
+    <figure>
+      <img src="https://picsum.photos/400/300" alt="Immagine Casuale" />
+    </figure>
+    <div class="lista-animali"></div>
+  </main>
+
+  <footer>
+    <p>Creato con amore da... un collega sbadato! 🐾</p>
+  </footer>
+
   <script type="text/babel">
 
-    const animalsChoices = ["Cane", "Gatto", "Pappagallo", "Cavallo", "Panda"];
-    
     function Modal({ title, content, show = false, onClose = () => {}, onConfirm = () => {} }) {
       return show && ReactDOM.createPortal(
         <div className="modal-container">
@@ -46,64 +43,91 @@
         document.body
       );
     }
-    
+
     function ListaAnimali() {
       const [animals, setAnimals] = React.useState([]);
       const [showModal, setShowModal] = React.useState(false);
       const [newAnimal, setNewAnimal] = React.useState("");
-    
-      const openModal = () => setShowModal(true);
+      const [error, setError] = React.useState("");
+
+      const openModal = () => {
+        setError("");
+        setShowModal(true);
+      };
+
       const closeModal = () => {
         setNewAnimal("");
+        setError("");
         setShowModal(false);
       };
-    
+
       const confirmAddAnimal = () => {
-        if (newAnimal.trim()) {
-          setAnimals([...animals, newAnimal.trim()]);
+        const animal = newAnimal.trim();
+        if (!animal) {
+          setError("⚠️ Inserisci un nome valido.");
+          return;
         }
+        const exists = animals.some(a => a.toLowerCase() === animal.toLowerCase());
+        if (exists) {
+          setError(`⚠️ "${animal}" è già presente nella lista.`);
+          return;
+        }
+        setAnimals([...animals, animal]);
         closeModal();
       };
-    
+
+      const removeAnimal = (indexToRemove) => {
+        setAnimals(animals.filter((_, index) => index !== indexToRemove));
+      };
+
       return (
         <div className="contenitore-lista">
           <button onClick={openModal} className="btn-aggiungi">
             Aggiungi Animale
           </button>
-    
+
           <details>
             <summary><strong>Animali</strong></summary>
-            <ul>
+            <ul className="lista-ul">
               {animals.map((animal, index) => (
-                <li key={index}>{animal}</li>
+                <li key={index} className="item-lista">
+                  <span>{animal}</span>
+                  <button
+                    onClick={() => removeAnimal(index)}
+                    className="btn-rimuovi"
+                  >
+                    Rimuovi
+                  </button>
+                </li>
               ))}
             </ul>
           </details>
-    
+
           <Modal
             title="Aggiungi un animale"
             show={showModal}
             onClose={closeModal}
             onConfirm={confirmAddAnimal}
             content={
-              <input
-                type="text"
-                placeholder="Es. Gatto"
-                value={newAnimal}
-                onChange={(e) => setNewAnimal(e.target.value)}
-              />
+              <div>
+                <input
+                  type="text"
+                  placeholder="Es. Gatto"
+                  value={newAnimal}
+                  onChange={(e) => setNewAnimal(e.target.value)}
+                />
+                {error && (
+                  <p className="errore">{error}</p>
+                )}
+              </div>
             }
           />
         </div>
       );
     }
-    
-    const root = ReactDOM.createRoot(document.querySelector('.lista-animali'));
-    root.render(<ListaAnimali />);
-    
-    </script>
-    
 
-   
-  </body>
+    const root = ReactDOM.createRoot(document.querySelector(".lista-animali"));
+    root.render(<ListaAnimali />);
+  </script>
+</body>
 </html>
