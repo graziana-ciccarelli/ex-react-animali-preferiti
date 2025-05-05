@@ -63,15 +63,24 @@
 
       const confirmAddAnimal = () => {
         const animal = newAnimal.trim();
+        const soloLettereRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/;
+
         if (!animal) {
           setError("⚠️ Inserisci un nome valido.");
           return;
         }
+
+        if (!soloLettereRegex.test(animal)) {
+          setError("⚠️ Il nome può contenere solo lettere.");
+          return;
+        }
+
         const exists = animals.some(a => a.toLowerCase() === animal.toLowerCase());
         if (exists) {
           setError(`⚠️ "${animal}" è già presente nella lista.`);
           return;
         }
+
         setAnimals([...animals, animal]);
         closeModal();
       };
